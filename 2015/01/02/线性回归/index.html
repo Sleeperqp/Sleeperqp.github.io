@@ -1,0 +1,371 @@
+
+ <!DOCTYPE HTML>
+<html >
+<head>
+  <meta charset="UTF-8">
+  
+    <title>线性回归 | sleeper_qp</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
+    
+    <meta name="author" content="sleeper_qp">
+    
+    <meta name="description" content="线性回归
+目录
+
+单变量线性回归
+多变量线性回归
+最小二乘法
+总结
+
+单变量线性回归
+引入
+ 问题，给你一系列的形式为(x,y)的点集,另外给定一个$$$X_1$$$,预测其y值。 例子：给你一些房屋交易的数据，数据格式为(房屋面积，交易总值), 这个时候给你一个待售房屋的面积，估计其售价。很直白的">
+    
+    
+    
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/pacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/pacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+
+</head>
+
+  <body>
+    <header>
+      <div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/img/logo.svg" alt="sleeper_qp" title="sleeper_qp"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="sleeper_qp">sleeper_qp</a></h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="Menu">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">文章</a></li>
+					
+						<li><a href="/about-me">关于</a></li>
+					
+					<li>
+					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="text" id="search" name="q" autocomplete="off" maxlength="20" placeholder="Search" />
+						<input type="hidden" name="q" value="site:yoursite.com">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2015/01/02/线性回归/" title="线性回归" itemprop="url">线性回归</a>
+  </h1>
+  <p class="article-author">By
+    
+      <a href="http://yoursite.com" title="sleeper_qp">sleeper_qp</a>
+    </p>
+  <p class="article-time">
+    <time datetime="2015-01-02T09:20:29.000Z" itemprop="datePublished">Jan 2 2015</time>
+    Updated:<time datetime="2015-01-02T09:23:01.000Z" itemprop="dateModified">Jan 2 2015</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">Contents</strong>
+		<ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#线性回归"><span class="toc-number">1.</span> <span class="toc-text">线性回归</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#目录"><span class="toc-number">1.1.</span> <span class="toc-text">目录</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#单变量线性回归"><span class="toc-number">2.</span> <span class="toc-text">单变量线性回归</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#引入"><span class="toc-number">2.1.</span> <span class="toc-text">引入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#评估函数"><span class="toc-number">2.2.</span> <span class="toc-text">评估函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#单线性回归"><span class="toc-number">2.3.</span> <span class="toc-text">单线性回归</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#问题转换"><span class="toc-number">2.3.0.1.</span> <span class="toc-text">问题转换</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#梯度下降法"><span class="toc-number">2.3.0.2.</span> <span class="toc-text">梯度下降法</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#多变量线性回归问题"><span class="toc-number">2.4.</span> <span class="toc-text">多变量线性回归问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#更进一步的梯度下降法"><span class="toc-number">2.4.1.</span> <span class="toc-text">更进一步的梯度下降法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#最小二乘法"><span class="toc-number">2.5.</span> <span class="toc-text">最小二乘法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">2.6.</span> <span class="toc-text">总结</span></a></li></ol></li></ol>
+		</div>
+		
+		<h1 id="线性回归">线性回归</h1>
+<h2 id="目录">目录</h2>
+<ol>
+<li>单变量线性回归</li>
+<li>多变量线性回归</li>
+<li>最小二乘法</li>
+<li>总结</li>
+</ol>
+<h1 id="单变量线性回归">单变量线性回归</h1>
+<h2 id="引入">引入</h2>
+<p> 问题，给你一系列的形式为(x,y)的点集,另外给定一个$$$X_1$$$,预测其y值。<br> 例子：给你一些房屋交易的数据，数据格式为(房屋面积，交易总值), 这个时候给你一个待售房屋的面积，估计其售价。<br><img src="C:\Users\sleeper\Desktop\线性回归\单变量线性回归.jpg" alt="单变量线性回归.jpg"><br>很直白的一种办法就是找到一条直线是尽可能去贴近所有集合点，然后根据这条直线来进行预测。</p>
+<p>例如<br><img src="C:\Users\sleeper\Desktop\线性回归\单变量线性回归1.jpg" alt="单变量线性回归1.jpg"></p>
+<p>对于这个例子 我们输入 5 后，根据方程$$$y = 0.8295x + 0.2683$$$预测其y值为4.4158<br>所以在这里，我们可以简单地对于给定的点集计算一个函数$$$y=ax$$$作为预测函数，根据预测函数来进行预测</p>
+<h2 id="评估函数">评估函数</h2>
+<p> 上面我们谈到了预测函数，那么问题来了，我们如何求这样一条预测函数？<br> 对于上面那个例子我们可以得出无数条直线去匹配它，那么怎么去评估这条直线好不好或者说是否贴近点集？<br> 自然地，可以将评估函数定义这条直线与点集里的点的距离之和，即<br>   $$cost= \sum<em>{i=1}^{N} [f(x_i)-y_i]^2$$<br> 这样我们就可以来评估一个函数是否适合来作为预测模型。<br> 当然，评估函数也可以其他的形式，比如说<br>  $$cost=\sum</em>{i=1}^N|f(x_i)-y_i|$$<br> 以上两者的评估效果存在着一些差异,另外一般都使用与前者类似的形式，原因是更方便求解线性回归问题。<br> 接下来就是介绍如果通过评估函数来求解单变量线性回归问题。</p>
+<h2 id="单线性回归">单线性回归</h2>
+<h4 id="问题转换">问题转换</h4>
+<p>首先这里重新定义下评估函数:<br>$$cost= \frac{1}{2N}\sum_{i=1}^{N} [f(x_i)-y_i]^2$$</p>
+<p>增加$$$\frac{1}{2N}$$$这个系数不变改变评估值的相对大小，只是有利于计算。<br>假设我们有一个直线函数：$$$f<em>{0}(x_i)=ax_i$$$<br>那么其评估值为<br> $$cost</em>{0}= \frac{1}{2N}\sum<em>{i=1}^{N} [f</em>{0}(x<em>i)-y_i]^2$$<br>如果现在cost为最小，那么我们就可以停止；如果不是，那么我们需要找到一条新函数使评估值变小。<br>所以现在将求最优直线的问题转换成求cost值最小的问题。<br>重新描述下现在的问题，对于评估函数<br>$$cost= \frac{1}{2N}\sum</em>{i=1}^{N} [f(x<em>i)-y_i]^2=\frac{1}{2N}\sum</em>{i=1}^{N} [(ax_i)-y_i]^2$$<br>我们需要找到a,b使cost最小。即使以下函数最小</p>
+<p>$$cost(a)==\frac{1}{2N}\sum_{i=1}^{N} [(ax_i)-y_i]^2$$</p>
+<h4 id="梯度下降法">梯度下降法</h4>
+<p>梯度的形式化定义是</p>
+<p><img src="C:\Users\sleeper\Desktop\线性回归\梯度.png" alt="梯度.png"></p>
+<p>其数学含义是梯度指向标量场增长最快的方向。</p>
+<p>假设你在爬山，在半山腰的一个地点，你环顾四周，发现了一条最陡峭的山路，这里的最陡峭的山路就是”梯度”。</p>
+<p>梯度下降法是一个最优化算法，wiki上的定义是<br>它是基于这样的观察：如果实值函数$$$F(\mathbf{x})$$$ 在点 $$$\mathbf{a}$$$ 处可微且有定义，那么函数$$$ F(\mathbf{x})$$$在 $$$\mathbf{a} $$$点沿着梯度相反的方向$$$ -\nabla F(\mathbf{a})$$$ 下降最快。<br>因而，如果<br>$$\mathbf{b}=\mathbf{a}-\gamma\nabla F(\mathbf{a})$$</p>
+<p>对于$$$ \gamma&gt;0$$$ 为一个够小数值时成立，那么$$$ F(\mathbf{a})\geq F(\mathbf{b})$$$。</p>
+<p>考虑到这一点，我们可以从函数 F 的局部极小值的初始估计$$$\mathbf{x}<em>0 $$$出发，并考虑如下序列 $$$\mathbf{x}_0, \mathbf{x}_1$$$,$$$ \mathbf{x}_2$$$, $$$\dots$$$ 使得$$$\mathbf{x}</em>{n+1}=\mathbf{x}_n-\gamma_n \nabla F(\mathbf{x}_n),\ n \ge 0$$$.<br>因此可得到<br>$$F(\mathbf{x}_0)\ge F(\mathbf{x}_1)\ge F(\mathbf{x}_2)\ge \cdots,$$<br>如果顺利的话序列 $$$(\mathbf{x}_n)$$$ 收敛到期望的极值。注意每次迭代步长$$$\gamma $$$可以改变。</p>
+<p><img src="C:\Users\sleeper\Desktop\线性回归\梯度下降法.png" alt="梯度下降法.png"></p>
+<p>还是以刚才爬山的例子，如果你想要尽可能快地爬上山，不考虑爬行的技巧，你在山底下$$$x0$$$点，环顾四周你发现$$$x_0$$$到$$$x_1$$$这段路最陡峭，你爬到了$$$x_1$$$，接着你继续环顾四周发现到$$$x_2$$$最陡峭，然后你又爬到了$$$x_2$$$循环下去，你最终爬上了山顶。这就是梯度下降法。其中$$$ \nabla F(\mathbf{a})$$$就是坡度，$$$\gamma$$$可以认为是与你这一步爬行距离大小有关的值，其值越大你爬行距离越大。<br>对于$$$\gamma$$$，它的取值会存在一些技巧，以及对求解过程的影响。具体可以看Andrew Ng在Machine Learning上Linear Regression with Multiple Variables 上关于它的讨论。<br>但是如果存在局部最优点即存在多个山峰你可能达到某个局部最优点就停止而不能到达全局最优点，所以梯度下降法是一种局部最优算法。<br>但是如果这个问题是凸优化问题，即简单地可以认为只有一个山顶，使用梯度下降法就没有问题。</p>
+<p>回到单变量线性回归问题上来，我们要解决<br>$$cost(a)==\frac{1}{2N}\sum_{i=1}^{N} [(ax_i)-y_i]^2$$</p>
+<p>的最小化问题，假设这个问题是单优化问题，我们使用梯度下降法来求解。</p>
+<p>求解过程如下:</p>
+<ol>
+<li>任意定义一个初始点$$$a_0$$$</li>
+<li>分别计算$$$a$$$的梯度值，并<em><strong>同时</strong></em>更新$$$a^{<code>}$$$即
+ $$a^{</code>}=a-\gamma \frac{\partial cost(a)}{\partial a}=a-\gamma \frac{1}{N}\sum_{i=1}^{N}(ax_i-y_i)x_i $$</li>
+<li>直至$$$a$$$不变化</li>
+</ol>
+<p>这样我们就解决了单变量线性回归问题。<br>所以接下来我们把这个问题推广成多变量的线性回归问题。</p>
+<h2 id="多变量线性回归问题">多变量线性回归问题</h2>
+<p>假设这里我们把$$$x$$$推广为一个由$$$x<em>1,x_2…x_n$$$组成的向量$$$\vec{x}$$$,即我们可以认为房价有多个因素决定，比如面积，楼层，是否带电梯等等。<br>即点集由($$$\vec{x^i}$$$,$$$y^i$$$)组成。<br>这里明确下关于点集中x点的定义,$$$\vec{x^i}$$$指点集中第i个$$$\vec{x}$$$，即第i个房价样本的多因素向量<br>$$$\vec{x^{i}</em>{j}}$$$指第i个$$$\vec{x}$$$的第j个因素，即第i个房价样本的第j个因素<br>所以我们求得直线函数为$$f(\vec{x})=b+\sum<em>{i=1}^N a_i<em>\vec{x_i}=\vec{a}\vec{x}+b$$<br>这里在$$$\vec{x}$$$加入$$$x_0=1$$$且$$$a_0=b$$$的话上述方程则为<br>$$f(\vec{x})=1</em>a_0+\sum</em>{i=1}^N a_i*\vec{x_i}=\vec{a}\vec{x}$$</p>
+<p>其中$$$\vec{a}=(a_0,a_1…a_n)$$$。<br>这个形式就跟单变量线性回归一样了。<br>同样地，我们使用梯度下降法可求得$$$\vec{a}$$$<br>过程为:</p>
+<ol>
+<li>任意定义一个初始点$$$\vec{a_0}$$$</li>
+<li>分别计算$$$\vec{a}$$$的梯度值，并<em><strong>同时</strong></em>更新$$$\vec{a^{‘}}$$$即<br>$$a<em>i^{‘}=a_i-\gamma \frac{\partial cost(a)}{\partial a_i}=a_i-\gamma \frac{1}{N}\sum</em>{j=1}^{N}(\vec a\vec x^j-y^j)x_i^j$$</li>
+<li>直至$$$\vec a$$$不变化</li>
+</ol>
+<p>这样我们就解决了多变量线性回归问题。</p>
+<h3 id="更进一步的梯度下降法">更进一步的梯度下降法</h3>
+<p>可以看到，梯度下降法解决了线性函数最优化问题。其实它也可以解决更高阶的问题。<br>对于非线性函数，如我们知道房子的长h，宽l，然后来预测房子的话，预测函数就会变成$$$f(h,y)=ahy$$$。<br>我们仍可以使用梯度下降法来进行求解。<br>同时这里我们也可以看到预测问题可以有其他形式的非线性预测函数。</p>
+<h2 id="最小二乘法">最小二乘法</h2>
+<p>首先还是回到问题上来，我们要解决的问题是</p>
+<p>$$cost(a)==\frac{1}{2N}\sum_{i=1}^{N} [(ax_i)-y_i]^2$$</p>
+<p>最小化问题。<br>在梯度下降法中，我们不断使$a$改变来最小化$$$cost$$$。<br>其实，可以发现当$$$cost$$$最小时，其各偏导为0.<br>即<br>$$\frac{\partial cost(a)}{\partial a<em>i}=\gamma \frac{1}{N}\sum</em>{j=1}^{N}(\vec a\vec x^j-y^j)x_i^j=0$$<br>那么通过求解这个线性方程即可直接求出$$$\vec a$$$。<br>令由$$$\vec x^j$$$组成的向量为$$$\vec X$$$,由$$$y^j$$$组成的向量为$$$\vec Y$$$<br>则由上式可推导成<br>$$<br>\vec X \vec a = \vec Y<br>$$<br>其中$$$\vec X$$$为$$$m\times n$$$的矩阵(m为样本个数，n为变量个数) $$$\vec a$$$为$$$n \times 1$$$的矩阵，$$$\vec Y$$$为$$$m \times 1$$$的矩阵。<br>其解为<br>$$<br>\vec a=\boldsymbol{X}^\dagger \vec Y<br>$$<br>其中$$$\boldsymbol{X}^\dagger$$$为$$$\vec X$$$的广义逆。<br>当然如果不想求广义逆的话，也可以将<br>$$<br>\vec X \vec a = \vec Y<br>$$<br>转换成<br>$$<br>\vec X^T\vec X \vec a = \vec X^T\vec Y<br>$$<br>$$<br>(\vec X^T\vec X)\vec a = \vec X^T\vec Y<br>$$<br>$$<br>\vec a = (\vec X^T\vec X)^{-1}\vec X^T\vec Y<br>$$<br>当 $$$(\vec X^T\vec X)$$$可逆时，上式就可以直接求解了<br>当$$$(\vec X^T\vec X)$$$不可逆时,则依然转换成广义逆求解。</p>
+<h2 id="总结">总结</h2>
+<p>我们在解决线性回归问题的时候，可以使用梯度下降法以及最小二乘法来进行求解。<br>两者的优劣:</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>梯度下降法</td>
+<td>可以处理大规模数据</td>
+<td>$$$\gamma$$$的取值需要不断试验，耗时，不能保证得到全局最优解</td>
+</tr>
+<tr>
+<td>最小二乘法</td>
+<td>直接求解，可以求得全局最优解</td>
+<td>时间复杂度为$$$O(n^3)$$$解决大规模数据时耗时大大超过梯度下降法</td>
+</tr>
+</tbody>
+</table>
+  
+	</div>
+		<footer class="article-footer clearfix">
+
+
+
+
+<div class="article-share" id="share">
+
+  <div data-url="http://yoursite.com/2015/01/02/线性回归/" data-title="线性回归 | sleeper_qp" data-tsina="undefined" class="share clearfix">
+  </div>
+
+</div>
+</footer>   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+
+<div class="next">
+<a href="/2014/12/11/hello-world/"  title="Hello World">
+ <strong>NEXT:</strong><br/> 
+ <span>Hello World
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="Show Sidebar"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">Contents</strong>
+  <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#线性回归"><span class="toc-number">1.</span> <span class="toc-text">线性回归</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#目录"><span class="toc-number">1.1.</span> <span class="toc-text">目录</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#单变量线性回归"><span class="toc-number">2.</span> <span class="toc-text">单变量线性回归</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#引入"><span class="toc-number">2.1.</span> <span class="toc-text">引入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#评估函数"><span class="toc-number">2.2.</span> <span class="toc-text">评估函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#单线性回归"><span class="toc-number">2.3.</span> <span class="toc-text">单线性回归</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#问题转换"><span class="toc-number">2.3.0.1.</span> <span class="toc-text">问题转换</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#梯度下降法"><span class="toc-number">2.3.0.2.</span> <span class="toc-text">梯度下降法</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#多变量线性回归问题"><span class="toc-number">2.4.</span> <span class="toc-text">多变量线性回归问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#更进一步的梯度下降法"><span class="toc-number">2.4.1.</span> <span class="toc-text">更进一步的梯度下降法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#最小二乘法"><span class="toc-number">2.5.</span> <span class="toc-text">最小二乘法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">2.6.</span> <span class="toc-text">总结</span></a></li></ol></li></ol>
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="Hide Sidebar"></a></div>
+<aside class="clearfix">
+
+  
+
+  
+
+  <div class="rsspart">
+	<a href="null" target="_blank" title="rss">RSS</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<div class="social-font clearfix">
+		
+		
+		
+		<a href="https://github.com/https://github.com/Sleeperqp" target="_blank" title="github"></a>
+		
+		
+		
+	</div>
+		<p class="copyright">Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/A-limon/pacman" target="_blank" title="Pacman">Pacman</a> © 2015 
+		
+		<a href="http://yoursite.com" target="_blank" title="sleeper_qp">sleeper_qp</a>
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.1.0.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      h  = $('article h2')
+      ah = $('article h2'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  if(ah.length==0){
+    t.css('display','none');
+  }else{
+    c.click(function(){
+      ta.css('display', 'block').addClass('fadeIn');
+    });
+    o.click(function(){
+      ta.css('display', 'none');
+    });
+    $(window).scroll(function(){
+      ta.css("top",Math.max(140,320-$(this).scrollTop()));
+    });
+  };
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#share"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://s.jiathis.com/qrcode.php?url=' + encodedUrl + '"/></div>',
+  '<a href="#textlogo" class="article-back-to-top" title="Top"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="QRcode"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="Weibo"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});     
+</script>
+
+
+
+
+
+
+  </body>
+</html>
